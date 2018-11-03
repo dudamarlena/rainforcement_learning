@@ -28,7 +28,8 @@ class Models(NamedTuple):
 
 class ActorNetwork:
     """
-
+    Input: current state of agent
+    Output: action which agent make in current state
     """
 
     def __init__(self, sess, state_dim, action_dim, action_bound):
@@ -122,7 +123,8 @@ class ActorNetwork:
 
 class CriticNetwork:
     """
-
+    Input: current state and action
+    Output: q value of state and action: Q(s,a).
     """
 
     def __init__(self, sess, state_dim, action_dim, num_actor_vars):
