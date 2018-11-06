@@ -1,4 +1,4 @@
-""" Module to train 'Walker' by DDPG algorithm """
+""" Module to train robot walking by DDPG algorithm """
 
 import gym
 import numpy as np
@@ -8,17 +8,17 @@ import tensorflow as tf
 from models.ddpg import Models
 from models.memory import Memory
 from experience import Experience
-from Walker import config
+from robot import config
 import paramethers as param
 
 
-def main(env_monitor: bool = True):
+def main(robot_name: str, env_monitor: bool = True):
     """
     Main function to create environment and teach the agent to walk
     :param env_monitor: monitor the agent actions, default value: True
     """
     with tf.Session() as sess:
-        env = gym.make(config.WALKER)
+        env = gym.make(robot_name)
         _set_seed(env)
         state_dim = env.observation_space.shape[0]
         action_dim = env.action_space.shape[0]
@@ -81,7 +81,7 @@ def train(
             memory.add(experience)
 
             if memory.size() > param.BATCH_SIZE:
-                update_targets(memory, models, episode_q_max)
+                episode_q_max = update_targets(memory, models, episode_q_max)
             state = next_state
             episode_reward += reward
 
@@ -96,7 +96,7 @@ def train(
             actions_num += 1
 
 
-def update_targets(memory: Memory, models: Models, episode_q_max: float):
+def update_targets(memory: Memory, models: Models, episode_q_max: float) -> float:
     """
     Use Action and Critic Networks and update targets of both models
     :param memory: Memory of agent
@@ -125,13 +125,13 @@ def update_targets(memory: Memory, models: Models, episode_q_max: float):
         states_b, actions_s, np.reshape(y_i, (param.BATCH_SIZE, 1))
     )
     episode_q_max += np.amax(predicted_q_value)
-
     a_outs = actor.predict(states_b)
     grads = critic.action_gradients(states_b, a_outs)
     actor.train(states_b, grads[0])
 
     actor.update_target_network()
     critic.update_target_network()
+    return episode_q_max
 
 
 def _set_seed(env, seed=param.RANDOM_SEED):
@@ -146,7 +146,3 @@ def _make_action(models: Models, state: np.ndarray):
     return models.actor.predict(
         np.reshape(state, (1, models.actor.s_dim)
                    )) + models.actor_noise()
-
-
-if __name__ == '__main__':
-    main()

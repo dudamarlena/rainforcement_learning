@@ -1,5 +1,6 @@
 """Module with training, network and memory parameters"""
 
+# DDPG algorithm
 ACTOR_LR = 0.0001
 CRITIC_LR = 0.001
 GAMMA = 0.99
@@ -8,3 +9,8 @@ MEMORY_SIZE = 1000000
 BATCH_SIZE = 128
 RANDOM_SEED = 1234
 TRAIN_EPISODES = 50000
+
+# DQL
+MAX_EXPLORE = 1.0
+MIN_EXPLORE = 0.01
+DECAY_RATE = 0.01
