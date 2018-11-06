@@ -8,19 +8,25 @@ import paramethers as param
 from experience import Experience
 from models.dql import DeepQNetwork
 from models.memory import Memory
-from robot import config
+from training import config
 
 
-def main(robot_name: str):
+def main(robot_name: str, env_monitor: bool = True):
     """
-    Main function to learn robot walking
+    Main function to learn robot walking using DQL algorithm
     """
     env = gym.make(robot_name)
     env.render(mode=config.MODEL)
     dqn = DeepQNetwork(env=env)
     memory = Memory(param.MEMORY_SIZE)
-
-    env = gym.wrappers.Monitor(env, config.MONITOR_PATH)
+    if env_monitor:
+        env = gym.wrappers.Monitor(
+            env=env,
+            directory=config.MONITOR_PATH,
+            force=True,
+            video_callable=lambda episode_id: episode_id % 1 == 0
+        )
+    print(f'Start training agent: {config.WALKER}')
     training(env, dqn, memory)
 
 
@@ -131,7 +137,7 @@ def _choice_action(
     :return: action and probability of exploration
     """
     explore_prob = param.MIN_EXPLORE + (param.MAX_EXPLORE - param.MIN_EXPLORE) * \
-                                       np.exp(-param.DECAY_RATE * step)
+                   np.exp(-param.DECAY_RATE * step)
     if explore_prob > np.random.rand():
         action = env.action_space.sample()
     else:

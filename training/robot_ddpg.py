@@ -8,13 +8,14 @@ import tensorflow as tf
 from models.ddpg import Models
 from models.memory import Memory
 from experience import Experience
-from robot import config
+from training import config
 import paramethers as param
 
 
 def main(robot_name: str, env_monitor: bool = True):
     """
     Main function to create environment and teach the agent to walk
+    :param robot_name: name of Robot Environment from PyBullet
     :param env_monitor: monitor the agent actions, default value: True
     """
     with tf.Session() as sess:
