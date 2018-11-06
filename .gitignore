@@ -1,7 +1,6 @@
-Humanoid/
 .idea/
-Walker/baza
-Walker/motor
-Walker/__pycache__
+training/baza
+training/motor
+training/__pycache__
 models/__pycache__
 __pycache__

@@ -7,6 +7,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfra
 PARENT_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 os.sys.path.insert(0, PARENT_DIR)
 MONITOR_PATH = 'C:\\Users\\Marlena\\Desktop\\inzynierka\\reinforcement learning\\Walker\\motor'
+SUMMARY_DIR = MONITOR_PATH
 
 WALKER = "Walker2DBulletEnv-v0"
 HALFCHEETAH = "HalfCheetahBulletEnv-v0"

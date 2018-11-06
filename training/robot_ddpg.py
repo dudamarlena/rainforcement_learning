@@ -53,7 +53,9 @@ def train(
     if render:
         env.render(mode=config.MODEL)
 
+    summary_ops, summary_vars = build_summaries()
     sess.run(tf.global_variables_initializer())
+    writer = tf.summary.FileWriter(config.SUMMARY_DIR, sess.graph)
 
     models.actor.update_target_network()
     models.critic.update_target_network()
@@ -68,6 +70,7 @@ def train(
         episode_q_max = 0
         actions_num = 0
         done = False
+
         while not done:
             env.render()
             action = _make_action(models, state)[0]
@@ -88,6 +91,17 @@ def train(
 
             if done:
                 all_actions += actions_num
+
+                summary_str = sess.run(
+                    summary_ops,
+                    feed_dict={
+                        summary_vars[0]: episode_reward,
+                        summary_vars[1]: episode_q_max / actions_num
+                    }
+                )
+                writer.add_summary(summary_str, episode)
+                writer.flush()
+
                 print(f'|Reward: {round(episode_reward)} '
                       f'| Episode: {episode} '
                       f'| Qmax: {round(episode_q_max/actions_num, 2)}'
@@ -115,15 +129,15 @@ def update_targets(memory: Memory, models: Models, episode_q_max: float) -> floa
         next_states_b, actor.predict_target(next_states_b)
     )
 
-    y_i = []
+    labels = []
     for index in range(param.BATCH_SIZE):
         if done_b[index]:
-            y_i.append(rewards_b[index])
+            labels.append(rewards_b[index])
         else:
-            y_i.append(rewards_b[index] + param.GAMMA * target[index])
+            labels.append(rewards_b[index] + param.GAMMA * target[index])
 
     predicted_q_value, _ = critic.train(
-        states_b, actions_s, np.reshape(y_i, (param.BATCH_SIZE, 1))
+        states_b, actions_s, np.reshape(labels, (param.BATCH_SIZE, 1))
     )
     episode_q_max += np.amax(predicted_q_value)
     a_outs = actor.predict(states_b)
@@ -147,3 +161,16 @@ def _make_action(models: Models, state: np.ndarray):
     return models.actor.predict(
         np.reshape(state, (1, models.actor.s_dim)
                    )) + models.actor_noise()
+
+
+def build_summaries():
+    """ Build summary of all learning needed in tensorbord """
+    episode_reward = tf.Variable(0.)
+    tf.summary.scalar("Reward", episode_reward)
+    episode_ave_max_q = tf.Variable(0.)
+    tf.summary.scalar("Qmax Value", episode_ave_max_q)
+
+    summary_vars = [episode_reward, episode_ave_max_q]
+    summary_ops = tf.summary.merge_all()
+
+    return summary_ops, summary_vars
