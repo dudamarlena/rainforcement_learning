@@ -2,14 +2,13 @@
 
 import gym
 import numpy as np
-import pybullet_envs
 import tensorflow as tf
 
-from models.ddpg import Models
-from models.memory import Memory
-from experience import Experience
-from training import config
+import config
 import paramethers as param
+from memory.experience import Experience
+from memory.memory import Memory
+from models.ddpg import Models
 
 
 def main(robot_name: str, env_monitor: bool = True):
@@ -41,7 +40,7 @@ def train(
         sess: tf.Session,
         env: gym.Env,
         models: Models,
-        render: bool = False,
+        render: bool = True,
 ):
     """
     Train Walker by using DDPG algorithm

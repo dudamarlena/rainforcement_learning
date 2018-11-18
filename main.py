@@ -1,9 +1,9 @@
-""" Main module to run learning choice robot """
+""" Main module to run learning choice robot and algorithm """
 
+import config
 from training import (
     robot_ddpg,
     robot_dql,
-    config,
 )
 
 if __name__ == "__main__":
@@ -20,12 +20,13 @@ if __name__ == "__main__":
     elif robot_name == 'Humanoid':
         choice_robot = config.HUMANOID
 
-    print(f'You choice robot: {robot_name}')
+    print(f'You chose the robot: {robot_name}\n\n')
     algorithm_name = input('You can choose two algorithms: '
                            '\nDeep Q-Learning(DQL) '
                            '\nor Deep Deterministic Policy Gradient (DDPG). '
                            '\nWrite short name of algorithm: \n')
 
+    print(f'You chose the algorithm: {algorithm_name}\n\n Start learning the robot...')
     if algorithm_name == 'DQL':
         robot_dql.main(choice_robot)
 

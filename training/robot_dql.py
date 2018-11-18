@@ -2,13 +2,12 @@
 
 import gym
 import numpy as np
-import pybullet_envs
 
+import config
 import paramethers as param
-from experience import Experience
+from memory.experience import Experience
+from memory.memory import Memory
 from models.dql import DeepQNetwork
-from models.memory import Memory
-from training import config
 
 
 def main(robot_name: str, env_monitor: bool = True):
@@ -95,16 +94,18 @@ def update_model(dqn: DeepQNetwork, env: gym.Env, memory: Memory):
     """
     inputs = np.zeros((param.BATCH_SIZE,) + env.observation_space.shape)
     targets = np.zeros((param.BATCH_SIZE, env.action_space.shape[0]))
-
-    for i, (state_, action, reward_, _, next_state_) in enumerate(memory.sample()):
+    states_, actions_, rewards_, done_, next_states_ = memory.sample_batch(
+        param.BATCH_SIZE
+    )
+    for i, state_ in enumerate(states_):
         inputs[i:i + 1] = state_
         targets[i] = dqn.model.predict(state_)
-        q_state = dqn.model.predict(next_state_)[0]
+        q_state = dqn.model.predict(next_states_[i])[0]
 
-        if (next_state_ == np.zeros(state_.shape)).all():
-            targets[i][action] = reward_
+        if (next_states_[i] == np.zeros(state_.shape)).all():
+            targets[i][actions_[i]] = rewards_[i]
         else:
-            targets[i][action] = reward_ + param.GAMMA * np.amax(q_state)
+            targets[i][actions_[i]] = rewards_[i] + param.GAMMA * np.amax(q_state)
     dqn.model.fit(inputs, targets, epochs=1, verbose=0)
 
 
@@ -137,7 +138,7 @@ def _choice_action(
     :return: action and probability of exploration
     """
     explore_prob = param.MIN_EXPLORE + (param.MAX_EXPLORE - param.MIN_EXPLORE) * \
-                   np.exp(-param.DECAY_RATE * step)
+                                       np.exp(-param.DECAY_RATE * step)
     if explore_prob > np.random.rand():
         action = env.action_space.sample()
     else:
