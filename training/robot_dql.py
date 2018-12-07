@@ -2,6 +2,7 @@
 
 import gym
 import numpy as np
+import pybullet_envs
 
 import config
 import paramethers as param
@@ -14,6 +15,7 @@ def main(robot_name: str, env_monitor: bool = True):
     """
     Main function to learn robot walking using DQL algorithm
     """
+    print(robot_name)
     env = gym.make(robot_name)
     env.render(mode=config.MODEL)
     dqn = DeepQNetwork(env=env)
@@ -25,7 +27,7 @@ def main(robot_name: str, env_monitor: bool = True):
             force=True,
             video_callable=lambda episode_id: episode_id % 1 == 0
         )
-    print(f'Start training agent: {config.WALKER}')
+    print(f'Start training agent: {robot_name}')
     training(env, dqn, memory)
 
 
@@ -54,7 +56,6 @@ def training(
         while not done:
             env.render()
             action, explore_prob = _choice_action(env, dqn, step, state)
-
             next_state, reward, done, info = env.step(action)
             experience = Experience.create_experience(
                 state=state,
@@ -103,9 +104,9 @@ def update_model(dqn: DeepQNetwork, env: gym.Env, memory: Memory):
         q_state = dqn.model.predict(next_states_[i])[0]
 
         if (next_states_[i] == np.zeros(state_.shape)).all():
-            targets[i][actions_[i]] = rewards_[i]
+            targets[i] = rewards_[i]
         else:
-            targets[i][actions_[i]] = rewards_[i] + param.GAMMA * np.amax(q_state)
+            targets[i] = rewards_[i] + param.GAMMA * np.amax(q_state)
     dqn.model.fit(inputs, targets, epochs=1, verbose=0)
 
 

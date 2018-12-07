@@ -6,9 +6,9 @@ import inspect
 CURRENT_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 PARENT_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 os.sys.path.insert(0, PARENT_DIR)
-# TODO: change paths
-MONITOR_PATH = 'C:\\Users\\Marlena\\Desktop\\inzynierka\\reinforcement learning\\training\\motor'
-SUMMARY_DIR = 'C:\\Users\\Marlena\\Desktop\\inzynierka\\reinforcement learning\\training\\summary'
+
+MONITOR_PATH = '.\training\motor'
+SUMMARY_DIR = '.\training\summary'
 
 WALKER = "Walker2DBulletEnv-v0"
 HALFCHEETAH = "HalfCheetahBulletEnv-v0"

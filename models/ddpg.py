@@ -57,10 +57,8 @@ class ActorNetwork:
     def create_actor_network(self):
         inputs = tflearn.input_data(shape=[None, self.s_dim])
         net = tflearn.fully_connected(inputs, 64)
-        # net = tflearn.layers.normalization.batch_normalization(net)
         net = tflearn.activations.relu(net)
         net = tflearn.fully_connected(net, 64)
-        # net = tflearn.layers.normalization.batch_normalization(net)
         net = tflearn.activations.relu(net)
         w_init = tflearn.initializations.uniform(minval=-UNIFORM_VALUE, maxval=UNIFORM_VALUE)
         out = tflearn.fully_connected(
@@ -149,7 +147,6 @@ class CriticNetwork:
         inputs = tflearn.input_data(shape=[None, self.s_dim])
         action = tflearn.input_data(shape=[None, self.a_dim])
         net = tflearn.fully_connected(inputs, 64)
-        # net = tflearn.layers.normalization.batch_normalization(net)
         net = tflearn.activations.relu(net)
         t1 = tflearn.fully_connected(net, 64)
         t2 = tflearn.fully_connected(action, 64)
@@ -189,6 +186,11 @@ class CriticNetwork:
             }
         )
 
+    def update_target_network(self):
+        self.sess.run(
+            self.update_target_network_params
+        )
+
     def action_gradients(self, inputs, actions):
         return self.sess.run(
             self.action_grads,
@@ -196,11 +198,6 @@ class CriticNetwork:
                 self.inputs: inputs,
                 self.action: actions
             }
-        )
-
-    def update_target_network(self):
-        self.sess.run(
-            self.update_target_network_params
         )
 
     def _update_params(self):
@@ -214,12 +211,12 @@ class CriticNetwork:
 
 
 class OrnsteinUhlenbeckActionNoise:
-    def __init__(self, mu, sigma=0.2 * np.ones(6), theta=.15, dt=1e-2, x0=None):
+    def __init__(self, mu, sigma=0.2 * np.ones(6), dt=1e-2, theta=.15, x0=None):
         self.theta = theta
         self.mu = mu
         self.sigma = sigma
-        self.dt = dt
         self.x0 = x0
+        self.dt = dt
         self.reset()
 
     def __call__(self):
@@ -230,6 +227,3 @@ class OrnsteinUhlenbeckActionNoise:
 
     def reset(self):
         self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
-
-    def __repr__(self):
-        return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(self.mu, self.sigma)

@@ -3,10 +3,11 @@
 from collections import deque
 import random
 import numpy as np
+import paramethers
 
 
 class Memory(object):
-    def __init__(self, buffer_size, random_seed=123):
+    def __init__(self, buffer_size, random_seed=paramethers.RANDOM_SEED):
         self.buffer_size = buffer_size
         self.count = 0
         self.buffer = deque()

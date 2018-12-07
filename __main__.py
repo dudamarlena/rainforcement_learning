@@ -9,18 +9,19 @@ from training import (
 if __name__ == "__main__":
 
     choice_robot = None
-    robot_name = input('You can choose tree robots: Walker, HalfCheetah and Humanoid. \n')
+    robot_name = input('You can choose two robots: Walker and HalfCheetah. \n')
+    while not choice_robot:
+        if robot_name == 'Walker':
+            choice_robot = config.WALKER
 
-    if robot_name == 'Walker':
-        choice_robot = config.WALKER
+        elif robot_name == 'HalfCheetah':
+            choice_robot = config.HALFCHEETAH
 
-    elif robot_name == 'HalfCheetah':
-        choice_robot = config.HALFCHEETAH
-
-    elif robot_name == 'Humanoid':
-        choice_robot = config.HUMANOID
+        else:
+            print('Wrong name of robot. Try one more time.')
 
     print(f'You chose the robot: {robot_name}\n\n')
+
     algorithm_name = input('You can choose two algorithms: '
                            '\nDeep Q-Learning(DQL) '
                            '\nor Deep Deterministic Policy Gradient (DDPG). '

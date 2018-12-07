@@ -3,6 +3,7 @@
 import gym
 import numpy as np
 import tensorflow as tf
+import pybullet_envs
 
 import config
 import paramethers as param
@@ -11,11 +12,11 @@ from memory.memory import Memory
 from models.ddpg import Models
 
 
-def main(robot_name: str, env_monitor: bool = True):
+def main(robot_name: str, env_monitor: bool = False):
     """
     Main function to create environment and teach the agent to walk
     :param robot_name: name of Robot Environment from PyBullet
-    :param env_monitor: monitor the agent actions, default value: True
+    :param env_monitor: monitor the agent actions, default value: False
     """
     with tf.Session() as sess:
         env = gym.make(robot_name)
@@ -52,10 +53,7 @@ def train(
     if render:
         env.render(mode=config.MODEL)
 
-    summary_ops, summary_vars = build_summaries()
     sess.run(tf.global_variables_initializer())
-    writer = tf.summary.FileWriter(config.SUMMARY_DIR, sess.graph)
-
     models.actor.update_target_network()
     models.critic.update_target_network()
 
@@ -90,17 +88,6 @@ def train(
 
             if done:
                 all_actions += actions_num
-
-                summary_str = sess.run(
-                    summary_ops,
-                    feed_dict={
-                        summary_vars[0]: episode_reward,
-                        summary_vars[1]: episode_q_max / actions_num
-                    }
-                )
-                writer.add_summary(summary_str, episode)
-                writer.flush()
-
                 print(f'|Reward: {round(episode_reward)} '
                       f'| Episode: {episode} '
                       f'| Qmax: {round(episode_q_max/actions_num, 2)}'
